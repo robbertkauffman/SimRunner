@@ -63,7 +63,7 @@ public abstract class AbstractRunner implements Runnable {
             try {
                 ((WorkloadThread) Thread.currentThread()).setContextValue("iteration", Long.valueOf(counter));
                 template.setVariables(variables);
-                long duration = doRun();
+                long latency = doRun();
                 counter++;
 
                 LOGGER.debug("Counter: {}, stopAfter: {}", counter, stopAfter);
@@ -76,7 +76,7 @@ public abstract class AbstractRunner implements Runnable {
                     keepGoing = false;
                 }
                 if (pace != 0) {
-                    long wait = Math.max(0, pace - duration);
+                    long wait = Math.max(0, pace - latency);
                     Thread.sleep(wait);
                 }
             } catch (Exception e) {
