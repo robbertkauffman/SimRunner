@@ -27,7 +27,11 @@ public class EnvVarSub {
             if (s.startsWith("$")) {
                 var t = System.getenv(s.substring(1));
                 if (t != null) {
-                    return t;
+                    try {
+                        return Integer.parseInt(t);
+                    } catch (NumberFormatException e) {
+                        return t;
+                    }
                 } else {
                     return s;
                 }
