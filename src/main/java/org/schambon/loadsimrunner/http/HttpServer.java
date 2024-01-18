@@ -14,6 +14,7 @@ public class HttpServer {
     private boolean enabled;
     private int port;
     private String host;
+    private Server server;
 
     public HttpServer(Document config, Reporter reporter) {
         this.reporter = reporter;
@@ -28,6 +29,7 @@ public class HttpServer {
         if (! enabled) return;
 
         Server server = new Server();
+        this.server = server;
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
         connector.setHost(host);
@@ -45,5 +47,9 @@ public class HttpServer {
         server.setHandler(list);
 
         server.start();
+    }
+
+    public void stop() throws Exception {
+        server.stop();
     }
 }
