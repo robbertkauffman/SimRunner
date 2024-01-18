@@ -179,11 +179,17 @@ public class WorkloadManager {
 
     public boolean hasActiveThreads() {
         for (Thread thread : activeThreads) {
-            if (thread.isAlive()) {
+            if (thread.getState() != Thread.State.TERMINATED) {
                 return true;
             }
         }
-        return false;
+        if (activeThreads.size() > 0) {
+            return false;
+        } else {
+            // if there are no threads it's still initializing 
+            // and we should not terminate
+            return true;
+        }
     }
 
     public MongoClient getMongoClient() {
