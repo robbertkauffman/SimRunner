@@ -1,5 +1,6 @@
 package org.schambon.loadsimrunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,12 +37,14 @@ public class WorkloadManager {
     Document params = null;
     Document variables = null;
     int threads;
+    List<Thread> activeThreads = new ArrayList<>();
     int batch;
     int pace;
     ReadPreference readPreference;
     ReadConcern readConcern;
     WriteConcern writeConcern;
     long stopAfter = -1;
+    int duration;
 
     Reporter reporter;
 
@@ -80,6 +83,8 @@ public class WorkloadManager {
             this.stopAfter = ((Number)_stopAfter).longValue();
         }
         LOGGER.debug("Workload {} stopping after {} (config: {})", name, stopAfter, _stopAfter);
+
+        this.duration = config.getInteger("duration", -1) * 1000;
 
         String readPref = config.getString("readPreference");
         if (readPref != null) {
@@ -138,6 +143,7 @@ public class WorkloadManager {
         for (var i = 0; i < threads; i++) {
             Thread thread = new WorkloadThread(name, i, getRunnable());
             thread.start();
+            activeThreads.add(thread);
         }
     }
 
@@ -169,6 +175,15 @@ public class WorkloadManager {
                     
                 };
         }
+    }
+
+    public boolean hasActiveThreads() {
+        for (Thread thread : activeThreads) {
+            if (thread.isAlive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public MongoClient getMongoClient() {
@@ -213,5 +228,9 @@ public class WorkloadManager {
 
     public long getStopAfter() {
         return stopAfter;
+    }
+
+    public int getDuration() {
+        return duration;
     }
 }

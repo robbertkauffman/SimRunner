@@ -95,7 +95,7 @@ public class SimRunner {
            
         }
         
-        while(true) {
+        while(hasActiveWorkloads()) {
             LOGGER.debug("Reporter waking up");
             try {
                 Thread.sleep((long) reportInterval);
@@ -104,6 +104,30 @@ public class SimRunner {
             }
             reporter.computeReport(reporterCallbacks);
         }
+
+        // final report
+        reporter.computeReport(reporterCallbacks);
+        
+        stop();
+    }
+
+    public void stop() {
+        try {
+            httpServer.stop();
+        } catch (Exception e) {
+            LOGGER.error("Cannot stop HTTP server", e);
+        }
+        System.exit(0);
+    }
+
+    private boolean hasActiveWorkloads() {
+        for (WorkloadManager workload : workloads) {
+            if (workload.hasActiveThreads()) {
+                return true;
+            }
+        }
+        LOGGER.info("No active workloads. Exiting...");
+        return false;
     }
 
     private void validateConfig() {

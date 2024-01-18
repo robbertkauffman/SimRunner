@@ -2,6 +2,8 @@ package org.schambon.loadsimrunner.runner;
 
 import com.mongodb.client.MongoCollection;
 
+import java.lang.System;
+
 import org.bson.Document;
 import org.schambon.loadsimrunner.TemplateManager;
 import org.schambon.loadsimrunner.WorkloadManager;
@@ -22,6 +24,8 @@ public abstract class AbstractRunner implements Runnable {
     protected Document params;
     protected Document variables; // may be null!
     protected long stopAfter;
+    protected int duration;
+    protected long startTime;
 
     protected long counter = 0;
 
@@ -48,11 +52,13 @@ public abstract class AbstractRunner implements Runnable {
         this.params = workloadConfiguration.getParams();
         this.variables = workloadConfiguration.getVariables();
         this.stopAfter = workloadConfiguration.getStopAfter();
+        this.duration = workloadConfiguration.getDuration();
     }
 
     @Override
     public void run() {
         var keepGoing = true;
+        startTime = System.currentTimeMillis();
         while (keepGoing) {
             try {
                 ((WorkloadThread) Thread.currentThread()).setContextValue("iteration", Long.valueOf(counter));
@@ -62,6 +68,10 @@ public abstract class AbstractRunner implements Runnable {
 
                 LOGGER.debug("Counter: {}, stopAfter: {}", counter, stopAfter);
                 if (stopAfter > 0 && counter >= stopAfter) {
+                    LOGGER.info("Workload {} stopping.", name);
+                    keepGoing = false;
+                }
+                if (System.currentTimeMillis() - startTime >= this.duration) {
                     LOGGER.info("Workload {} stopping.", name);
                     keepGoing = false;
                 }
