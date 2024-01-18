@@ -24,7 +24,7 @@ public abstract class AbstractRunner implements Runnable {
     protected Document params;
     protected Document variables; // may be null!
     protected long stopAfter;
-    protected int duration;
+    protected int workloadDuration;
     protected long startTime;
 
     protected long counter = 0;
@@ -52,7 +52,7 @@ public abstract class AbstractRunner implements Runnable {
         this.params = workloadConfiguration.getParams();
         this.variables = workloadConfiguration.getVariables();
         this.stopAfter = workloadConfiguration.getStopAfter();
-        this.duration = workloadConfiguration.getDuration();
+        this.workloadDuration = workloadConfiguration.getDuration();
     }
 
     @Override
@@ -63,7 +63,7 @@ public abstract class AbstractRunner implements Runnable {
             try {
                 ((WorkloadThread) Thread.currentThread()).setContextValue("iteration", Long.valueOf(counter));
                 template.setVariables(variables);
-                long latency = doRun();
+                long queryDuration = doRun();
                 counter++;
 
                 LOGGER.debug("Counter: {}, stopAfter: {}", counter, stopAfter);
@@ -71,12 +71,12 @@ public abstract class AbstractRunner implements Runnable {
                     LOGGER.info("Workload {} stopping.", name);
                     keepGoing = false;
                 }
-                if (System.currentTimeMillis() - startTime >= this.duration) {
+                if (this.workloadDuration > 0 && System.currentTimeMillis() - startTime >= this.workloadDuration) {
                     LOGGER.info("Workload {} stopping.", name);
                     keepGoing = false;
                 }
                 if (pace != 0) {
-                    long wait = Math.max(0, pace - latency);
+                    long wait = Math.max(0, pace - queryDuration);
                     Thread.sleep(wait);
                 }
             } catch (Exception e) {

@@ -95,9 +95,8 @@ public class SimRunner {
            
         }
         
-        boolean keepRunning = false;
-        long now = System.currentTimeMillis();
-        while(keepRunning && System.currentTimeMillis() > now + 5000l) {
+        boolean keepRunning = true;
+        while(keepRunning) {
             LOGGER.debug("Reporter waking up");
             try {
                 Thread.sleep((long) reportInterval);
@@ -108,7 +107,7 @@ public class SimRunner {
             
             // do check after initial report to give it time to initialize workloads
             // and do a final report on completed workloads when finished
-            if (hasActiveWorkloads()) {
+            if (!hasActiveWorkloads()) {
                 keepRunning = false;
             }
         }
