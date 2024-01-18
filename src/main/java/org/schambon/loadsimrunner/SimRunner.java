@@ -95,6 +95,7 @@ public class SimRunner {
            
         }
         
+        boolean keepRunning = false;
         long now = System.currentTimeMillis();
         while(keepRunning && System.currentTimeMillis() > now + 5000l) {
             LOGGER.debug("Reporter waking up");
